@@ -1,6 +1,7 @@
 import { Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 
+import AnalogFace from './AnalogFace';
 
 export default function Clock() {
   const [date, setDate] = useState(new Date());
@@ -21,7 +22,13 @@ export default function Clock() {
   return (
     <div>
       <h1>Clock</h1>
-      <Typography variant="h4" color="text.secondary" align="center"
+
+      <AnalogFace date={date} />
+
+      <Typography
+        variant="h4"
+        color="text.secondary"
+        align="center"
       >{`${hours}:${minutes}:${seconds}`}</Typography>
     </div>
   );
