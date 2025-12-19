@@ -4,7 +4,6 @@ import {
   WbSunny,
   Cloud,
   CloudQueue,
-  Grain,
   Thunderstorm,
   AcUnit,
   Foggy,
@@ -22,19 +21,8 @@ const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
 const HIGH_TEMP_COLOR = "#F57C00"; // Orange
 const LOW_TEMP_COLOR = "#1976D2"; // Blue
 
-function getPrecipitationIcon(probability: number, fontSize: number = 28) {
-  const sx = { fontSize, color: "#42A5F5" };
-
-  if (probability < 30) {
-    // Low probability: outlined water drop
-    return <Opacity sx={sx} />;
-  } else if (probability < 60) {
-    // Medium probability: filled water drop
-    return <WaterDrop sx={sx} />;
-  } else {
-    // High probability: rain drops
-    return <Grain sx={sx} />;
-  }
+function PrecipitationIcon({ fontSize = 28 }: { fontSize?: number }) {
+  return <Opacity sx={{ fontSize, color: "#42A5F5" }} />;
 }
 
 function getWeatherIcon(code: number, size: "large" | "medium" = "large") {
@@ -46,10 +34,10 @@ function getWeatherIcon(code: number, size: "large" | "medium" = "large") {
   if (code === 0) return <WbSunny sx={{ ...sx, color: "#FFB300" }} />;
   if (code <= 3) return <CloudQueue sx={{ ...sx, color: "#78909C" }} />;
   if (code <= 48) return <Foggy sx={{ ...sx, color: "#90A4AE" }} />;
-  if (code <= 57) return <Grain sx={{ ...sx, color: "#64B5F6" }} />;
-  if (code <= 67) return <Cloud sx={{ ...sx, color: "#546E7A" }} />;
+  if (code <= 57) return <WaterDrop sx={{ ...sx, color: "#64B5F6" }} />;
+  if (code <= 67) return <WaterDrop sx={{ ...sx, color: "#42A5F5" }} />;
   if (code <= 77) return <AcUnit sx={{ ...sx, color: "#81D4FA" }} />;
-  if (code <= 82) return <Grain sx={{ ...sx, color: "#42A5F5" }} />;
+  if (code <= 82) return <WaterDrop sx={{ ...sx, color: "#1E88E5" }} />;
   if (code >= 95) return <Thunderstorm sx={{ ...sx, color: "#5C6BC0" }} />;
   return <Cloud sx={{ ...sx, color: "#78909C" }} />;
 }
@@ -159,7 +147,7 @@ export default function Weather() {
             </Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            {getPrecipitationIcon(weather.today.precipitationProbability)}
+            <PrecipitationIcon />
             <Typography variant="h4" sx={{ color: "text.secondary" }}>
               {weather.today.precipitationProbability}%
             </Typography>
@@ -198,7 +186,7 @@ export default function Weather() {
               </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              {getPrecipitationIcon(weather.tomorrow.precipitationProbability)}
+              <PrecipitationIcon />
               <Typography variant="h4" sx={{ color: "text.secondary" }}>
                 {weather.tomorrow.precipitationProbability}%
               </Typography>
