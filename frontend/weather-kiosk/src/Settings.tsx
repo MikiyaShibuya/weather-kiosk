@@ -19,7 +19,7 @@ import {
   Paper,
 } from "@mui/material";
 import { MyLocation, Search } from "@mui/icons-material";
-import { useSettings } from "./SettingsContext";
+import { useSettings, ThemeMode } from "./SettingsContext";
 
 interface SettingsProps {
   open: boolean;
@@ -65,11 +65,6 @@ async function searchCity(query: string): Promise<GeocodingResult[]> {
 
 export default function Settings({ open, onClose }: SettingsProps) {
   const { settings, updateSettings } = useSettings();
-  const [cityName, setCityName] = useState(settings.cityName);
-  const [latitude, setLatitude] = useState(settings.latitude);
-  const [longitude, setLongitude] = useState(settings.longitude);
-  const [shiftToNight, setShiftToNight] = useState(settings.shiftToNight);
-  const [shiftToDay, setShiftToDay] = useState(settings.shiftToDay);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
@@ -99,9 +94,11 @@ export default function Settings({ open, onClose }: SettingsProps) {
     const displayName = result.admin1
       ? `${result.name}, ${result.admin1}`
       : `${result.name}, ${result.country}`;
-    setCityName(displayName);
-    setLatitude(result.latitude);
-    setLongitude(result.longitude);
+    updateSettings({
+      cityName: displayName,
+      latitude: result.latitude,
+      longitude: result.longitude,
+    });
     setSearchResults([]);
     setSearchQuery("");
   };
@@ -118,10 +115,9 @@ export default function Settings({ open, onClose }: SettingsProps) {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude: lat, longitude: lng } = position.coords;
-        setLatitude(lat);
-        setLongitude(lng);
 
         // Reverse geocode to get city name
+        let newCityName = `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
         try {
           const params = new URLSearchParams();
           params.set("latitude", lat.toString());
@@ -134,12 +130,17 @@ export default function Settings({ open, onClose }: SettingsProps) {
           if (data.timezone) {
             // Use timezone as a fallback city name
             const parts = data.timezone.split("/");
-            setCityName(parts[parts.length - 1].replace(/_/g, " "));
+            newCityName = parts[parts.length - 1].replace(/_/g, " ");
           }
         } catch {
-          setCityName(`${lat.toFixed(2)}, ${lng.toFixed(2)}`);
+          // Keep default coordinate-based name
         }
 
+        updateSettings({
+          cityName: newCityName,
+          latitude: lat,
+          longitude: lng,
+        });
         setGeolocating(false);
       },
       (err) => {
@@ -150,23 +151,7 @@ export default function Settings({ open, onClose }: SettingsProps) {
     );
   };
 
-  const handleSave = () => {
-    updateSettings({
-      cityName,
-      latitude,
-      longitude,
-      shiftToNight,
-      shiftToDay,
-    });
-    onClose();
-  };
-
-  const handleCancel = () => {
-    setCityName(settings.cityName);
-    setLatitude(settings.latitude);
-    setLongitude(settings.longitude);
-    setShiftToNight(settings.shiftToNight);
-    setShiftToDay(settings.shiftToDay);
+  const handleClose = () => {
     setSearchQuery("");
     setSearchResults([]);
     setError(null);
@@ -174,7 +159,7 @@ export default function Settings({ open, onClose }: SettingsProps) {
   };
 
   return (
-    <Dialog open={open} onClose={handleCancel} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
       <DialogTitle>Settings</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
@@ -239,51 +224,73 @@ export default function Settings({ open, onClose }: SettingsProps) {
 
             <TextField
               label="City Name"
-              value={cityName}
-              onChange={(e) => setCityName(e.target.value)}
+              value={settings.cityName}
+              onChange={(e) => updateSettings({ cityName: e.target.value })}
               fullWidth
               size="small"
             />
             <Typography variant="caption" color="text.secondary">
-              {latitude.toFixed(4)}, {longitude.toFixed(4)}
+              {settings.latitude.toFixed(4)}, {settings.longitude.toFixed(4)}
             </Typography>
           </Box>
 
           <FormControl fullWidth>
-            <InputLabel>Shift to Day</InputLabel>
+            <InputLabel>Theme</InputLabel>
             <Select
-              value={shiftToDay}
-              label="Shift to Day"
-              onChange={(e) => setShiftToDay(e.target.value as number)}
+              value={settings.themeMode}
+              label="Theme"
+              onChange={(e) =>
+                updateSettings({ themeMode: e.target.value as ThemeMode })
+              }
             >
-              {timeOptions.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
+              <MenuItem value="light">Light</MenuItem>
+              <MenuItem value="dark">Dark</MenuItem>
+              <MenuItem value="auto">Auto (by time)</MenuItem>
             </Select>
           </FormControl>
 
-          <FormControl fullWidth>
-            <InputLabel>Shift to Night</InputLabel>
-            <Select
-              value={shiftToNight}
-              label="Shift to Night"
-              onChange={(e) => setShiftToNight(e.target.value as number)}
-            >
-              {timeOptions.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {settings.themeMode === "auto" && (
+            <>
+              <FormControl fullWidth>
+                <InputLabel>Shift to Day</InputLabel>
+                <Select
+                  value={settings.shiftToDay}
+                  label="Shift to Day"
+                  onChange={(e) =>
+                    updateSettings({ shiftToDay: e.target.value as number })
+                  }
+                >
+                  {timeOptions.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel>Shift to Night</InputLabel>
+                <Select
+                  value={settings.shiftToNight}
+                  label="Shift to Night"
+                  onChange={(e) =>
+                    updateSettings({ shiftToNight: e.target.value as number })
+                  }
+                >
+                  {timeOptions.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">
-          Save
+        <Button onClick={handleClose} variant="contained">
+          Close
         </Button>
       </DialogActions>
     </Dialog>

@@ -6,12 +6,15 @@ import {
   ReactNode,
 } from "react";
 
+export type ThemeMode = "light" | "dark" | "auto";
+
 export interface Settings {
   shiftToNight: number; // minutes since midnight (0-1430)
   shiftToDay: number; // minutes since midnight (0-1430)
   cityName: string;
   latitude: number;
   longitude: number;
+  themeMode: ThemeMode;
 }
 
 interface SettingsContextType {
@@ -28,6 +31,7 @@ const defaultSettings: Settings = {
   cityName: "Yokohama",
   latitude: 35.4437,
   longitude: 139.638,
+  themeMode: "auto",
 };
 
 function loadSettings(): Settings {
@@ -47,9 +51,14 @@ function saveSettings(settings: Settings): void {
 }
 
 function checkIsNightMode(settings: Settings): boolean {
+  const { themeMode, shiftToNight, shiftToDay } = settings;
+
+  if (themeMode === "light") return false;
+  if (themeMode === "dark") return true;
+
+  // Auto mode: check time
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  const { shiftToNight, shiftToDay } = settings;
 
   if (shiftToNight > shiftToDay) {
     // Normal case: day 6:00-21:00, night 21:00-6:00
