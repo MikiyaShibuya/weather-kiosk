@@ -6,7 +6,7 @@ import checker from 'vite-plugin-checker';
 
 // Load VITE_PORT from env value
 // https://stackoverflow.com/questions/66389043/how-can-i-use-vite-env-variables-in-vite-config-js
-export default ({ mode }) => {
+export default ({ mode }: { mode: string }) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
   return defineConfig({

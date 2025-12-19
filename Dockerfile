@@ -1,9 +1,9 @@
 FROM node:20-alpine AS base
 
-COPY weather-kiosk /weather-kiosk
-
-WORKDIR /weather-kiosk
+WORKDIR /app
+COPY package*.json ./
 RUN npm install
+COPY . .
 
 # ==== Develop ====
 FROM base AS dev
@@ -18,7 +18,7 @@ RUN npm run build
 # ==== Release ====
 FROM nginx:stable-alpine AS release
 
-COPY --from=build /weather-kiosk/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 CMD ["nginx", "-g", "daemon off;"]

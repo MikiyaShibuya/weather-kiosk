@@ -1,3 +1,16 @@
-.DS_Store
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
 .env
-.devcontainer
+
+# OS
+.DS_Store
+
+# IDE
+.devcontainer/
+.vscode/
+.idea/
