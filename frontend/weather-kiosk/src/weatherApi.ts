@@ -74,10 +74,3 @@ export async function fetchWeather(
     },
   };
 }
-
-export function getTemperatureColor(temp: number): string {
-  if (temp < 10) return "#2196F3"; // Cold - Blue
-  if (temp < 20) return "#03A9F4"; // Cool - Light Blue
-  if (temp < 30) return "#FF9800"; // Warm - Orange
-  return "#F44336"; // Hot - Red
-}

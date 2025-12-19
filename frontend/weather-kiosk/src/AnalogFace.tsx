@@ -1,8 +1,16 @@
+import { useSettings } from './SettingsContext';
+
 export default function AnalogFace(props: { date: Date }) {
-  const colorClockFace = '#f5f5f5';
-  const colorStroke = '#292a2d';
-  const colorStrokeLighter = '#777';
+  const { isNightMode } = useSettings();
+
+  // Colors for light and dark mode
+  const colorClockFace = isNightMode ? '#292a2d' : '#f5f5f5';
+  const colorStroke = isNightMode ? '#f5f5f5' : '#292a2d';
+  const colorStrokeLighter = isNightMode ? '#aaa' : '#777';
   const colorSeconds = '#fb4d56';
+  const colorFaceFill = isNightMode ? '#1e1e1e' : '#f1f1f1';
+  const colorTickMajor = isNightMode ? '#ccc' : '#333';
+  const colorTickMinor = isNightMode ? '#666' : '#aaa';
 
   const seconds = props.date.getSeconds();
   const minutes = props.date.getMinutes();
@@ -28,10 +36,10 @@ export default function AnalogFace(props: { date: Date }) {
         <g>
           <path
             d="M0 60c0 33.137 26.863 60 60 60s60-26.863 60-60S93.137 0 60 0 0 26.863 0 60z"
-            fill="#f1f1f1"
+            fill={colorFaceFill}
           ></path>
           <g
-            stroke="#333"
+            stroke={colorTickMajor}
             style={{
               strokeWidth: 1,
               strokeLinecap: 'round',
@@ -51,7 +59,7 @@ export default function AnalogFace(props: { date: Date }) {
             <path d="M32.016 11.518l-1.5-2.598"></path>
           </g>
           <g
-            stroke="#aaa"
+            stroke={colorTickMinor}
             style={{
               strokeWidth: 1,
               strokeLinecap: 'round',

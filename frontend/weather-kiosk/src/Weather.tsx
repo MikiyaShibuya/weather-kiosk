@@ -8,15 +8,37 @@ import {
   Thunderstorm,
   AcUnit,
   Foggy,
-  Umbrella,
+  WaterDrop,
+  Opacity,
+  ArrowUpward,
+  ArrowDownward,
 } from "@mui/icons-material";
-import { fetchWeather, getTemperatureColor, WeatherData } from "./weatherApi";
+import { fetchWeather, WeatherData } from "./weatherApi";
 import { useSettings } from "./SettingsContext";
 
 const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
+// Fixed colors for high/low temperatures
+const HIGH_TEMP_COLOR = "#F57C00"; // Orange
+const LOW_TEMP_COLOR = "#1976D2"; // Blue
+
+function getPrecipitationIcon(probability: number, fontSize: number = 28) {
+  const sx = { fontSize, color: "#42A5F5" };
+
+  if (probability < 30) {
+    // Low probability: outlined water drop
+    return <Opacity sx={sx} />;
+  } else if (probability < 60) {
+    // Medium probability: filled water drop
+    return <WaterDrop sx={sx} />;
+  } else {
+    // High probability: rain drops
+    return <Grain sx={sx} />;
+  }
+}
+
 function getWeatherIcon(code: number, size: "large" | "medium" = "large") {
-  const fontSize = size === "large" ? 80 : 48;
+  const fontSize = size === "large" ? 120 : 72;
   const sx = { fontSize };
 
   // WMO Weather interpretation codes
@@ -92,10 +114,10 @@ export default function Weather() {
         padding: 2,
       }}
     >
-      {/* Today's Weather - Top Half */}
+      {/* Today's Weather - 5/8 height */}
       <Box
         sx={{
-          flex: 1,
+          flex: 5,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -104,75 +126,84 @@ export default function Weather() {
           borderColor: "divider",
         }}
       >
-        <Typography variant="subtitle1" sx={{ color: "text.secondary", mb: 1 }}>
+        <Typography variant="h5" sx={{ color: "text.secondary", mb: 1 }}>
           {settings.cityName}
         </Typography>
-        {getWeatherIcon(weather.current.weatherCode)}
-        <Typography
-          variant="h1"
-          sx={{
-            fontWeight: "bold",
-            color: getTemperatureColor(weather.current.temperature),
-            mt: 1,
-          }}
-        >
-          {Math.round(weather.current.temperature)}°
-        </Typography>
-        <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
+
+        {/* Icon and Current Temperature - Side by Side */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {getWeatherIcon(weather.current.weatherCode)}
           <Typography
-            variant="h5"
-            sx={{ color: getTemperatureColor(weather.today.tempMax) }}
+            variant="h1"
+            sx={{
+              fontWeight: "bold",
+              color: "text.secondary",
+            }}
           >
-            {Math.round(weather.today.tempMax)}°
-          </Typography>
-          <Typography
-            variant="h5"
-            sx={{ color: getTemperatureColor(weather.today.tempMin) }}
-          >
-            {Math.round(weather.today.tempMin)}°
+            {Math.round(weather.current.temperature)}°
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
-          <Umbrella sx={{ fontSize: 20, color: "#42A5F5" }} />
-          <Typography variant="body1" sx={{ color: "text.secondary" }}>
-            {weather.today.precipitationProbability}%
-          </Typography>
+
+        {/* High/Low/Precipitation - Horizontal Row */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 3, mt: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <ArrowUpward sx={{ fontSize: 28, color: HIGH_TEMP_COLOR }} />
+            <Typography variant="h4" sx={{ color: HIGH_TEMP_COLOR }}>
+              {Math.round(weather.today.tempMax)}°
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <ArrowDownward sx={{ fontSize: 28, color: LOW_TEMP_COLOR }} />
+            <Typography variant="h4" sx={{ color: LOW_TEMP_COLOR }}>
+              {Math.round(weather.today.tempMin)}°
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            {getPrecipitationIcon(weather.today.precipitationProbability)}
+            <Typography variant="h4" sx={{ color: "text.secondary" }}>
+              {weather.today.precipitationProbability}%
+            </Typography>
+          </Box>
         </Box>
       </Box>
 
-      {/* Tomorrow's Weather - Bottom Half */}
+      {/* Tomorrow's Weather - 3/8 height */}
       <Box
         sx={{
-          flex: 1,
+          flex: 3,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <Typography variant="subtitle1" sx={{ color: "text.secondary", mb: 1 }}>
+        <Typography variant="h5" sx={{ color: "text.secondary", mb: 1 }}>
           Tomorrow
         </Typography>
-        {getWeatherIcon(weather.tomorrow.weatherCode, "medium")}
-        <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-          <Typography
-            variant="h4"
-            sx={{ color: getTemperatureColor(weather.tomorrow.tempMax) }}
-          >
-            {Math.round(weather.tomorrow.tempMax)}°
-          </Typography>
-          <Typography
-            variant="h4"
-            sx={{ color: getTemperatureColor(weather.tomorrow.tempMin) }}
-          >
-            {Math.round(weather.tomorrow.tempMin)}°
-          </Typography>
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
-          <Umbrella sx={{ fontSize: 18, color: "#42A5F5" }} />
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            {weather.tomorrow.precipitationProbability}%
-          </Typography>
+
+        {/* Icon, Temperature, and Precipitation - Side by Side */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {getWeatherIcon(weather.tomorrow.weatherCode, "medium")}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <ArrowUpward sx={{ fontSize: 28, color: HIGH_TEMP_COLOR }} />
+              <Typography variant="h4" sx={{ color: HIGH_TEMP_COLOR }}>
+                {Math.round(weather.tomorrow.tempMax)}°
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              <ArrowDownward sx={{ fontSize: 28, color: LOW_TEMP_COLOR }} />
+              <Typography variant="h4" sx={{ color: LOW_TEMP_COLOR }}>
+                {Math.round(weather.tomorrow.tempMin)}°
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              {getPrecipitationIcon(weather.tomorrow.precipitationProbability)}
+              <Typography variant="h4" sx={{ color: "text.secondary" }}>
+                {weather.tomorrow.precipitationProbability}%
+              </Typography>
+            </Box>
+          </Box>
         </Box>
       </Box>
     </Box>
