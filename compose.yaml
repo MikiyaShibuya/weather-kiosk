@@ -17,6 +17,7 @@ services:
       - PORT=${FRONTEND_PORT}
     volumes:
       - ./frontend/weather-kiosk:/weather-kiosk
+      - /weather-kiosk/node_modules
       # - ./frontend/nginx.conf:/etc/nginx/nginx.conf
       # - ./frontend/log:/app/log
     ports:
