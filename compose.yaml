@@ -12,7 +12,7 @@ services:
     << : *service_defaults
     build:
       context: frontend
-      target: ${LAUNCH_MODE:-release}
+      target: ${LAUNCH_MODE:-dev}
     environment:
       - PORT=${FRONTEND_PORT}
     volumes:
@@ -27,7 +27,7 @@ services:
     << : *service_defaults
     build:
       context: backend
-      target: ${LAUNCH_MODE:-release}
+      target: ${LAUNCH_MODE:-dev}
     environment:
       - PORT=${BACKEND_PORT}
     volumes:
