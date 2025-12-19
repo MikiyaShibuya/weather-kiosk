@@ -1,7 +1,3 @@
-// Yokohama coordinates (placeholder)
-const LATITUDE = 35.4437;
-const LONGITUDE = 139.638;
-
 export interface WeatherData {
   current: {
     temperature: number;
@@ -34,10 +30,13 @@ interface OpenMeteoResponse {
   };
 }
 
-export async function fetchWeather(): Promise<WeatherData> {
+export async function fetchWeather(
+  latitude: number,
+  longitude: number
+): Promise<WeatherData> {
   const params = new URLSearchParams();
-  params.set("latitude", LATITUDE.toString());
-  params.set("longitude", LONGITUDE.toString());
+  params.set("latitude", latitude.toString());
+  params.set("longitude", longitude.toString());
   params.set("current", "temperature_2m,weather_code");
   params.set(
     "daily",

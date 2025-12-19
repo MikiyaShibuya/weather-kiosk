@@ -11,6 +11,7 @@ import {
   Umbrella,
 } from "@mui/icons-material";
 import { fetchWeather, getTemperatureColor, WeatherData } from "./weatherApi";
+import { useSettings } from "./SettingsContext";
 
 const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
@@ -32,13 +33,14 @@ function getWeatherIcon(code: number, size: "large" | "medium" = "large") {
 }
 
 export default function Weather() {
+  const { settings } = useSettings();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadWeather = async () => {
       try {
-        const data = await fetchWeather();
+        const data = await fetchWeather(settings.latitude, settings.longitude);
         setWeather(data);
         setError(null);
       } catch {
@@ -49,7 +51,7 @@ export default function Weather() {
     loadWeather();
     const interval = setInterval(loadWeather, REFRESH_INTERVAL);
     return () => clearInterval(interval);
-  }, []);
+  }, [settings.latitude, settings.longitude]);
 
   if (error) {
     return (
@@ -98,11 +100,12 @@ export default function Weather() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          borderBottom: "1px solid #e0e0e0",
+          borderBottom: 1,
+          borderColor: "divider",
         }}
       >
-        <Typography variant="subtitle1" sx={{ color: "#666", mb: 1 }}>
-          Yokohama
+        <Typography variant="subtitle1" sx={{ color: "text.secondary", mb: 1 }}>
+          {settings.cityName}
         </Typography>
         {getWeatherIcon(weather.current.weatherCode)}
         <Typography
@@ -131,7 +134,7 @@ export default function Weather() {
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
           <Umbrella sx={{ fontSize: 20, color: "#42A5F5" }} />
-          <Typography variant="body1" sx={{ color: "#666" }}>
+          <Typography variant="body1" sx={{ color: "text.secondary" }}>
             {weather.today.precipitationProbability}%
           </Typography>
         </Box>
@@ -147,7 +150,7 @@ export default function Weather() {
           justifyContent: "center",
         }}
       >
-        <Typography variant="subtitle1" sx={{ color: "#666", mb: 1 }}>
+        <Typography variant="subtitle1" sx={{ color: "text.secondary", mb: 1 }}>
           Tomorrow
         </Typography>
         {getWeatherIcon(weather.tomorrow.weatherCode, "medium")}
@@ -167,7 +170,7 @@ export default function Weather() {
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 1 }}>
           <Umbrella sx={{ fontSize: 18, color: "#42A5F5" }} />
-          <Typography variant="body2" sx={{ color: "#666" }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
             {weather.tomorrow.precipitationProbability}%
           </Typography>
         </Box>
